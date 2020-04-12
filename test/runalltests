@@ -1,0 +1,4 @@
+#!/bin/sh
+./udp_server.py &
+sleep 0.2
+./udp_client.py
