@@ -1,27 +1,29 @@
 #!/usr/bin/python3
 
-import socket
+from socket import *
 PACKET_SIZE = 16
 USE_IPV6 = False
 
-def open_socket(host, port):
+def open(host = '', port = 0):
     if USE_IPV6:
-        sock = socket.socket(AF_INET6, SOCK_DGRAM)
+        sock = socket(AF_INET6, SOCK_DGRAM)
     else:
-        sock = socket.socket(AF_INET, SOCK_DGRAM)
-    addr = (host, port)
+        sock = socket(AF_INET, SOCK_DGRAM)
     if host != '':
-        sock.bind(addr)
-    return (sock, addr)
+        sock.bind((host, port))
+    return sock
 
-def send(udp, packet, dest, port):
+def send(sock, packet, dest, port):
     dst = (dest, port)
-    udp[0].sendto(packet, MSG_CONFIRM, dst)
-    answer, _ = udp[0].recvfrom(PACKET_SIZE, MSG_WAITALL)
+    sock.sendto(packet, MSG_CONFIRM, dst)
+    answer, _ = sock.recvfrom(PACKET_SIZE, MSG_WAITALL)
     return answer;
 
-def accept(udp):
-    return recvfrom(PACKET_SIZE, MSG_WAITALL)
+def accept(sock):
+    return sock.recvfrom(PACKET_SIZE, MSG_WAITALL)
 
-def answer(udp, packet, dst):
-    udp[0].sendto(packet, MSG_CONFIRM, dst)
+def answer(sock, packet, dst):
+    sock.sendto(packet, MSG_CONFIRM, dst)
+
+def close(sock):
+    sock.close()
