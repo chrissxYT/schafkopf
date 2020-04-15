@@ -58,20 +58,11 @@ def max_trumpf(t, c):
         return t
     if tl == 2 and cl == 3:
         return c
-    if tl == 3 and cl == 3:
-        if th > ch:
-            return t
-        else:
-            return c
-    if tl == 2 and tl == 2:
-        if th > ch:
-            return t
-        else:
-            return c
+    if tl == cl:
+        return max(t, c)
     if tl > cl:
         return t
-    else:
-        return c
+    return c
 
 def max_farbe(t, c):
     tl = t & 0x0f
@@ -80,10 +71,7 @@ def max_farbe(t, c):
     ch = c & 0xf0
     if th != ch:
         return t
-    if tl > cl:
-        return t
-    else:
-        return c
+    return max(t, c)
 
 def highest_farbe(cards):
     t = cards[0]
