@@ -25,8 +25,8 @@ def accept(sock):
 def answer(sock, packet, dst):
     sock.sendto(packet, MSG_CONFIRM, dst)
 
-def sendnull(sock, dst):
-    answer(sock, [0] * PACKET_SIZE, dst)
+def nullpack():
+    return [0] * PACKET_SIZE
 
 def close(sock):
     sock.close()
