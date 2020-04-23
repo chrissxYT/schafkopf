@@ -147,17 +147,15 @@ def tick_game():
         if ended:
             return False
     else if players in [2, 3, 4, 6, 8, 12, 24]:
-        start = True
         for p in players:
             if not p.startvote:
-                start = False
-        if start:
-            available_cards = all_cards.copy()
-            while len(available_cards) > 0:
-                for p in players:
-                    card = choice(available_cards)
-                    available_cards.remove(card)
-                    p.cards.append(card)
+                return True
+        available_cards = all_cards.copy()
+        while len(available_cards) > 0:
+            for p in players:
+                card = choice(available_cards)
+                available_cards.remove(card)
+                p.cards.append(card)
     return True
 
 b = True
