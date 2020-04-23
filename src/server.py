@@ -98,6 +98,12 @@ def has_player_id(pid):
             return True
     return False
 
+def get_player(pid):
+    for p in players:
+        if p.pid == pid:
+            return players.index(p)
+    return -1
+
 def handle_packet(packet, client):
     print('Incoming: "{}" from "{}"'.format(packet.hex(), client))
     packid = packet[0]
@@ -110,13 +116,16 @@ def handle_packet(packet, client):
             pid = 0
             while pid == 0 or has_player_id(pid):
                 pid = generate_player_id()
-            players.append({'pid':pid,'cards':[]})
+            players.append({'pid':pid,'cards':[],startvote:False})
             udp.answer(sock, bytes(pid), client)
     else:
         pid = packet[1]
-        if not has_player_id(pid) or pid == 0:
+        if pid == 0 or not has_player_id(pid):
             answer = udp.nullpack()
         else:
+            if packid == 2:
+                players[get_player(pid)].startvote = True
+                answer = [1] * udp.PACKET_SIZE
     print('Outgoing: "{}" to "{}"'.format(answer.hex(), client))
     udp.answer(sock, answer, client)
 
@@ -128,7 +137,7 @@ def tick_game():
                 ended = False
         if ended:
             return False
-    else if 24 % players == 0 and False:
+    else if players in [2, 3, 4, 6, 8, 12, 24] and False:
         start()
     return True
 
