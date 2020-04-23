@@ -5,11 +5,6 @@ import udp
 from random import SystemRandom
 udp.PACKET_SIZE = 16
 
-sock = udp.open('127.0.0.1', 4269)
-
-players = []
-running = False
-
 Eichel = 'e'
 Blatt = 'b'
 Herz = 'h'
@@ -21,6 +16,14 @@ Ten = '10'
 König = 'k'
 Nine = '9'
 
+sock = udp.open('127.0.0.1', 4269)
+
+players = []
+running = False
+all_cards = [0x8b, 0x8a, 0x84, 0x83, 0x82, 0x80,
+             0x4b, 0x4a, 0x44, 0x43, 0x42, 0x40,
+             0x2b, 0x2a, 0x24, 0x23, 0x22, 0x20,
+             0x1b, 0x1a, 0x14, 0x13, 0x12, 0x10]
 trumpf = [Ober, Unter, Herz]
 
 def is_of_type(typ, card):
@@ -90,7 +93,13 @@ def round_winner(cards):
         return highest_farbe(cards[0], cards)
 
 def generate_player_id():
-    return SystemRandom().randint(0, 255)
+    return rand(0, 255)
+
+def rand(start, end):
+    return SystemRandom().randint(start, end)
+
+def choice(x):
+    return SystemRandom().choice(x)
 
 def has_player_id(pid):
     for p in players:
@@ -137,8 +146,18 @@ def tick_game():
                 ended = False
         if ended:
             return False
-    else if players in [2, 3, 4, 6, 8, 12, 24] and False:
-        start()
+    else if players in [2, 3, 4, 6, 8, 12, 24]:
+        start = True
+        for p in players:
+            if not p.startvote:
+                start = False
+        if start:
+            available_cards = all_cards.copy()
+            while len(available_cards) > 0:
+                for p in players:
+                    card = choice(available_cards)
+                    available_cards.remove(card)
+                    p.cards.append(card)
     return True
 
 b = True
