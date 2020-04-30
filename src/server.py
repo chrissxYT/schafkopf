@@ -15,15 +15,16 @@ Ass = 'a'
 Ten = '10'
 König = 'k'
 Nine = '9'
-
-sock = udp.open('127.0.0.1', 4269)
-
-players = []
-running = False
 all_cards = [0x8b, 0x8a, 0x84, 0x83, 0x82, 0x80,
              0x4b, 0x4a, 0x44, 0x43, 0x42, 0x40,
              0x2b, 0x2a, 0x24, 0x23, 0x22, 0x20,
              0x1b, 0x1a, 0x14, 0x13, 0x12, 0x10]
+
+sock = udp.open('127.0.0.1', 4269)
+
+players = []
+stack = []
+running = False
 trumpf = [Ober, Unter, Herz]
 
 def is_of_type(typ, card):
@@ -119,7 +120,7 @@ def handle_packet(packet, client):
     if packid == 0:
         answer = udp.nullpack()
     else if packid == 1:
-        if len(players) > 250:
+        if len(players) >= 24:
             answer = udp.nullpack()
         else:
             pid = 0
@@ -156,6 +157,7 @@ def tick_game():
                 card = choice(available_cards)
                 available_cards.remove(card)
                 p.cards.append(card)
+        running = True
     return True
 
 b = True
