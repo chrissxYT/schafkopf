@@ -130,21 +130,25 @@ def handle_packet(packet, client):
             while pid == 0 or has_player_id(pid):
                 pid = generate_player_id()
             players.append({'pid':pid,'name':[],'cards':[],'startvote':False})
-            answer = bytes(pid)
+            answer = bytes(pid) + [0] * (PACKET_SIZE - 1)
     else:
         pid = packet[1]
         if pid == 0 or not has_player_id(pid):
             answer = udp.nullpack()
         else if packid == 2:
-            players[get_player(pid)].startvote = True
-            answer = [1] * udp.PACKET_SIZE
+            pindex = get_player(pid)
+            players[pindex].startvote = !players[pindex].startvote
+            if players[pindex].startvote:
+                answer = [1] * udp.PACKET_SIZE
+            else:
+                answer = [0] * udp.PACKET_SIZE
         else if packid == 3:
             if running:
                 game_status = [1] * 2
             else:
                 game_status = [0] * 2
             p_cards = players[get_player(pid)].cards
-            card_pad = [0] * (udp.PACKET_SIZE - 4 - len(p_cards))
+            card_pad = [0] * (udp.PACKET_SIZE - 6 - len(p_cards))
             # TODO: if it is your turn ipt = 1 else 0
             answer = [1] * 2 + game_status + ipt + p_cards + card_pad
         else if packid == 4:
