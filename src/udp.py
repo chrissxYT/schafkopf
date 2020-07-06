@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 from socket import *
-PACKET_SIZE = 16
+PACKET_SIZE = 32
 USE_IPV6 = False
 
 def open(host = '', port = 0):

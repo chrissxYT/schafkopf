@@ -1,9 +1,10 @@
 #!/usr/bin/python3
+# this program's goal is to implement a server for the csp protocol
 
 import sys
 import udp
 from random import SystemRandom
-udp.PACKET_SIZE = 16
+udp.PACKET_SIZE = 32
 
 Eichel = 'e'
 Blatt = 'b'
@@ -117,25 +118,51 @@ def get_player(pid):
 def handle_packet(packet, client):
     print('Incoming: "{}" from "{}"'.format(packet.hex(), client))
     packid = packet[0]
-    if packid == 0:
+    if len(packet) != udp.PACKET_SIZE:
+        answer = [0] # dont use me as an amplifier
+    else if packid == 0:
         answer = udp.nullpack()
     else if packid == 1:
-        if len(players) >= 24:
+        if len(players) >= 24 or running:
             answer = udp.nullpack()
         else:
             pid = 0
             while pid == 0 or has_player_id(pid):
                 pid = generate_player_id()
-            players.append({'pid':pid,'cards':[],startvote:False})
-            udp.answer(sock, bytes(pid), client)
+            players.append({'pid':pid,'name':[],'cards':[],'startvote':False})
+            answer = bytes(pid)
     else:
         pid = packet[1]
         if pid == 0 or not has_player_id(pid):
             answer = udp.nullpack()
-        else:
-            if packid == 2:
-                players[get_player(pid)].startvote = True
-                answer = [1] * udp.PACKET_SIZE
+        else if packid == 2:
+            players[get_player(pid)].startvote = True
+            answer = [1] * udp.PACKET_SIZE
+        else if packid == 3:
+            if running:
+                game_status = [1] * 2
+            else:
+                game_status = [0] * 2
+            p_cards = players[get_player(pid)].cards
+            card_pad = [0] * (udp.PACKET_SIZE - 4 - len(p_cards))
+            # TODO: if it is your turn ipt = 1 else 0
+            answer = [1] * 2 + game_status + ipt + p_cards + card_pad
+        else if packid == 4:
+            pids = []
+            for p in players:
+                pids.add(p.pid)
+            pid_pad = [0] * (udp.PACKET_SIZE - 8 - len(pids))
+            answer = [1] * 8 + pids + pid_pad
+        else if packid == 5:
+            pname = players[get_player(packet[2])]
+            pname_pad = [0] * (udp.PACKET_SIZE - 2 - len(pname)
+            answer = [1] * 2 + pname + pname_pad
+        else if packid == 6:
+            stack_pad = [0] * (udp.PACKET_SIZE - 8 - len(stack))
+            answer = [1] * 8 + stack + stack_pad
+        else if packid == 7:
+            players[get_player(pid)].name = packet[2:]
+            answer = [1] * udp.PACKET_SIZE
     print('Outgoing: "{}" to "{}"'.format(answer.hex(), client))
     udp.answer(sock, answer, client)
 
